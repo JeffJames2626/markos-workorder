@@ -6,6 +6,7 @@ import {
   getAllWorkOrders,
 } from "@/lib/db/queries/work-orders";
 import { serializePrisma } from "@/lib/utils";
+import { notifyAdmins } from "@/lib/push";
 import { z } from "zod";
 
 const PartSchema = z.object({
@@ -66,6 +67,15 @@ export async function POST(request: Request) {
     ...parsed.data,
     userId: session.user.id,
   });
+
+  // Notify admins when a tech submits a work order
+  if (session.user.role !== "admin") {
+    notifyAdmins(
+      "New Work Order",
+      `${session.user.name} submitted a work order for ${parsed.data.clientName}`,
+      `/history/${order.id}`
+    ).catch(() => {});
+  }
 
   return NextResponse.json(serializePrisma(order), { status: 201 });
 }

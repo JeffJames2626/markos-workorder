@@ -22,7 +22,7 @@ export function BottomNav({ role, userName, userEmail }: BottomNavProps) {
     <>
       <nav
         className="fixed bottom-0 left-0 right-0 z-50 bg-overlay border-t border-border"
-        style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
+        style={{ paddingBottom: "calc(12px + env(safe-area-inset-bottom, 0px))" }}
       >
         <div className="flex items-center justify-between px-6 py-3 max-w-[480px] mx-auto">
           {/* Home */}
