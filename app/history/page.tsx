@@ -14,9 +14,9 @@ export default async function HistoryPage() {
   const orders = serializePrisma(raw);
 
   return (
-    <div className="min-h-dvh flex flex-col bg-black">
+    <div className="min-h-dvh flex flex-col bg-background">
       <main className="flex-1 w-full max-w-[480px] mx-auto px-4 overflow-y-auto pb-24 pt-6">
-        <h1 className="text-xl font-semibold text-white mb-5">
+        <h1 className="text-xl font-semibold text-foreground mb-5">
           {isAdmin ? "All Work Orders" : "My Work Orders"}
         </h1>
         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}

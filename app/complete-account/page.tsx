@@ -3,8 +3,8 @@ import { CompleteAccountForm } from "@/components/auth/CompleteAccountForm";
 
 export default function CompleteAccountPage() {
   return (
-    <div className="min-h-dvh flex items-center justify-center bg-black px-4">
-      <Suspense fallback={<div className="text-white/50 text-sm">Loading...</div>}>
+    <div className="min-h-dvh flex items-center justify-center bg-background px-4">
+      <Suspense fallback={<div className="text-muted text-sm">Loading...</div>}>
         <CompleteAccountForm />
       </Suspense>
     </div>

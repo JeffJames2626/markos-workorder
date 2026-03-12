@@ -17,8 +17,8 @@ type Order = {
 export function RecentActivity({ orders }: { orders: Order[] }) {
   if (orders.length === 0) {
     return (
-      <div className="flex items-center justify-center rounded-xl bg-[#171717] h-[120px]">
-        <p className="text-sm text-white/40">No work orders yet</p>
+      <div className="flex items-center justify-center rounded-xl bg-surface h-[120px]">
+        <p className="text-sm text-muted">No work orders yet</p>
       </div>
     );
   }
@@ -31,21 +31,21 @@ export function RecentActivity({ orders }: { orders: Order[] }) {
         return (
           <div
             key={order.id}
-            className="bg-[#171717] rounded-xl p-4 flex items-center gap-2 active:scale-[0.98] transition-transform duration-100"
+            className="bg-surface rounded-xl p-4 flex items-center gap-2 active:scale-[0.98] transition-transform duration-100"
           >
             {/* Text content */}
             <div className="flex-1 min-w-0 flex flex-col gap-2">
-              <p className="text-xs font-medium text-white tracking-tight">
+              <p className="text-xs font-medium text-foreground tracking-tight">
                 {order.clientName}
               </p>
-              <p className="text-base font-medium text-white tracking-tight truncate">
+              <p className="text-base font-medium text-foreground tracking-tight truncate">
                 {order.address}
               </p>
             </div>
 
             {/* Hours badge */}
-            <div className="flex-shrink-0 w-14 h-14 rounded-full bg-[#262626] flex items-center justify-center">
-              <span className="text-xs font-medium text-white">
+            <div className="flex-shrink-0 w-14 h-14 rounded-full border border-border flex items-center justify-center">
+              <span className="text-xs font-medium text-foreground">
                 {hrs ? `${hrs} h` : "—"}
               </span>
             </div>

@@ -74,7 +74,7 @@ export function CompleteAccountForm() {
 
   if (loading) {
     return (
-      <div className="text-center text-white/50 text-sm">Loading...</div>
+      <div className="text-center text-muted text-sm">Loading...</div>
     );
   }
 
@@ -148,7 +148,7 @@ export function CompleteAccountForm() {
             onChange={(e) => setConfirm(e.target.value)}
             fullWidth
           />
-          {error && <p className="text-sm text-red-400">{error}</p>}
+          {error && <p className="text-sm text-danger">{error}</p>}
           <Button
             type="submit"
             variant="primary"

@@ -13,7 +13,7 @@ export default async function Users() {
   const users = serializePrisma(await getAllUsers());
 
   return (
-    <div className="min-h-dvh flex flex-col bg-black">
+    <div className="min-h-dvh flex flex-col bg-background">
       <main className="flex-1 w-full max-w-[480px] mx-auto px-4 overflow-y-auto pb-24 pt-6">
         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
         <UsersPage users={users as any} currentUserId={session.user.id} />

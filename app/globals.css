@@ -1,9 +1,19 @@
 @import "tailwindcss";
 @import "@heroui/styles";
 
-/* Dark theme field overrides — HeroUI v3 sets field-border: transparent by default */
+/* Brand accent: override default HeroUI blue to our pink/magenta */
+:root,
+[data-theme="light"] {
+  --accent: oklch(0.5644 0.2 350.5);
+  --accent-foreground: var(--snow);
+  --field-border: var(--border);
+  --field-border-width: 1px;
+}
+
 .dark,
 [data-theme="dark"] {
-  --field-border: oklch(35% 0.006 286.033);
+  --accent: oklch(0.5644 0.2 350.5);
+  --accent-foreground: var(--snow);
+  --field-border: var(--border);
   --field-border-width: 1px;
 }

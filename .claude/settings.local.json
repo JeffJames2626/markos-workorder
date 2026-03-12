@@ -12,7 +12,8 @@
       "Bash(cd \"C:\\\\Users\\\\Morgan Caldbeck\\\\Documents\\\\dev\\\\markos-workorder\" && npm run build 2>&1 | tail -20)",
       "WebFetch(domain:v3.heroui.com)",
       "mcp__figma-desktop__get_design_context",
-      "mcp__figma-desktop__get_screenshot"
+      "mcp__figma-desktop__get_screenshot",
+      "mcp__heroui-react__get_docs"
     ]
   }
 }

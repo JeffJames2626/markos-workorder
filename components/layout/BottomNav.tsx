@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
@@ -12,34 +12,36 @@ interface BottomNavProps {
 }
 
 export function BottomNav({ role, userName, userEmail }: BottomNavProps) {
-  if (role === "admin") {
-    return <AdminNav userName={userName} userEmail={userEmail} />;
-  }
-  return <TechNav />;
-}
-
-/* ─── Admin: pill bar with history / new WO / menu drawer ─── */
-
-function AdminNav({ userName, userEmail }: { userName: string; userEmail: string }) {
   const pathname = usePathname();
   const router = useRouter();
-  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
 
-  const isHistory = pathname === "/history";
+  const isAdmin = role === "admin";
 
   return (
     <>
       <nav
-        className="fixed bottom-0 left-0 right-0 z-50 flex justify-center"
-        style={{ paddingBottom: "calc(8px + env(safe-area-inset-bottom, 0px))" }}
+        className="fixed bottom-0 left-0 right-0 z-50 bg-overlay border-t border-border"
+        style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
       >
-        <div className="flex items-center justify-between w-64 px-8 py-2 rounded-full bg-[#262626]">
-          {/* History */}
-          <Link href="/history" aria-label="History">
+        <div className="flex items-center justify-between px-6 py-3 max-w-[480px] mx-auto">
+          {/* Home */}
+          <Link href="/workorder" aria-label="Home" className={`p-2 ${pathname === "/workorder" ? "text-accent" : "text-muted"}`}>
             <svg
-              width="28" height="28" viewBox="0 0 32 32" fill="none"
-              stroke={isHistory ? "#cc367e" : "#a3a3a3"}
-              strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"
+              width="24" height="24" viewBox="0 0 32 32" fill="none"
+              stroke="currentColor"
+              strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+            >
+              <path d="M5 14L16 5L27 14V26H20V20H12V26H5V14Z" />
+            </svg>
+          </Link>
+
+          {/* History */}
+          <Link href="/history" aria-label="History" className={`p-2 ${pathname === "/history" || pathname.startsWith("/history/") ? "text-accent" : "text-muted"}`}>
+            <svg
+              width="24" height="24" viewBox="0 0 32 32" fill="none"
+              stroke="currentColor"
+              strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
             >
               <path d="M6 16a10 10 0 1 1 3 7.07" />
               <polyline points="16 10 16 16 20 18" />
@@ -47,26 +49,44 @@ function AdminNav({ userName, userEmail }: { userName: string; userEmail: string
             </svg>
           </Link>
 
-          {/* New Work Order FAB */}
+          {/* Add (New Work Order) */}
           <button
             onClick={() => router.push("/workorder/new")}
             aria-label="New work order"
-            className="flex items-center justify-center w-12 h-12 rounded-full bg-[#cc367e] active:scale-95 transition-transform"
+            className="flex items-center justify-center w-[82px] h-12 rounded-full bg-accent text-accent-foreground active:scale-95 transition-transform"
           >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
               <line x1="12" y1="5" x2="12" y2="19" />
               <line x1="5" y1="12" x2="19" y2="12" />
             </svg>
           </button>
 
-          {/* Menu button */}
+          {/* Clients */}
+          <Link href="/clients" aria-label="Clients" className={`p-2 ${pathname === "/clients" ? "text-accent" : "text-muted"}`}>
+            <svg
+              width="24" height="24" viewBox="0 0 32 32" fill="none"
+              stroke="currentColor"
+              strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+            >
+              <circle cx="16" cy="10" r="4" />
+              <path d="M8 26v-2a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v2" />
+              <circle cx="25" cy="11" r="3" />
+              <path d="M25 17a5 5 0 0 1 4 5v2" />
+              <circle cx="7" cy="11" r="3" />
+              <path d="M7 17a5 5 0 0 0-4 5v2" />
+            </svg>
+          </Link>
+
+          {/* More */}
           <button
-            onClick={() => setDrawerOpen(true)}
-            aria-label="Menu"
+            onClick={() => setMoreOpen(true)}
+            aria-label="More"
+            className={`p-2 ${moreOpen ? "text-accent" : "text-muted"}`}
           >
             <svg
-              width="28" height="28" viewBox="0 0 24 24" fill="none"
-              stroke="#a3a3a3" strokeWidth="1.8" strokeLinecap="round"
+              width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor"
+              strokeWidth="2" strokeLinecap="round"
             >
               <line x1="4" y1="6" x2="20" y2="6" />
               <line x1="4" y1="12" x2="20" y2="12" />
@@ -76,78 +96,73 @@ function AdminNav({ userName, userEmail }: { userName: string; userEmail: string
         </div>
       </nav>
 
-      {/* Admin drawer */}
-      {drawerOpen && (
-        <div className="fixed inset-0 z-[60]" onClick={() => setDrawerOpen(false)}>
+      {/* More drawer */}
+      {moreOpen && (
+        <div className="fixed inset-0 z-[60]" onClick={() => setMoreOpen(false)}>
           {/* Backdrop */}
           <div className="absolute inset-0 bg-black/60" />
 
-          {/* Drawer panel — slides up from bottom */}
+          {/* Drawer panel */}
           <div
-            className="absolute bottom-0 left-0 right-0 bg-[#171717] rounded-t-2xl flex flex-col animate-in slide-in-from-bottom duration-200"
-            style={{ height: "85dvh" }}
+            className="absolute bottom-0 left-0 right-0 bg-overlay rounded-t-2xl flex flex-col animate-in slide-in-from-bottom duration-200"
+            style={{ maxHeight: "85dvh" }}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Drag handle */}
             <div className="flex justify-center pt-3 pb-2">
-              <div className="w-10 h-1 rounded-full bg-white/20" />
+              <div className="w-10 h-1 rounded-full bg-border" />
             </div>
 
             {/* User card */}
-            <div className="px-5 py-4 border-b border-white/10">
+            <div className="px-5 py-4 border-b border-border">
               <div className="flex items-center gap-3">
-                <div className="w-11 h-11 rounded-full bg-[#cc367e]/20 flex items-center justify-center">
-                  <span className="text-[#cc367e] font-semibold text-base">
+                <div className="w-11 h-11 rounded-full bg-accent-soft flex items-center justify-center">
+                  <span className="text-accent font-semibold text-base">
                     {userName.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()}
                   </span>
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-sm font-medium text-white">{userName}</span>
-                  <span className="text-xs text-white/50">{userEmail}</span>
+                  <span className="text-sm font-medium text-overlay-foreground">{userName}</span>
+                  <span className="text-xs text-muted">{userEmail}</span>
                 </div>
-                <span className="ml-auto text-[10px] font-semibold uppercase tracking-wider text-[#cc367e] bg-[#cc367e]/15 px-2 py-0.5 rounded-full">
-                  Admin
-                </span>
+                {isAdmin && (
+                  <span className="ml-auto text-[10px] font-semibold uppercase tracking-wider text-accent bg-accent-soft px-2 py-0.5 rounded-full">
+                    Admin
+                  </span>
+                )}
               </div>
             </div>
 
-            {/* Nav links */}
-            <div className="flex-1 px-5 py-4">
-              <nav className="flex flex-col gap-1">
-                <DrawerLink
-                  href="/clients"
-                  label="Clients"
-                  active={pathname === "/clients"}
-                  icon={
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                      <circle cx="9" cy="7" r="4" />
-                      <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                    </svg>
-                  }
-                  onNavigate={() => setDrawerOpen(false)}
-                />
-                <DrawerLink
-                  href="/users"
-                  label="Users"
-                  active={pathname === "/users"}
-                  icon={
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                      <circle cx="12" cy="7" r="4" />
-                    </svg>
-                  }
-                  onNavigate={() => setDrawerOpen(false)}
-                />
-              </nav>
+            {/* Admin links */}
+            {isAdmin && (
+              <div className="px-5 py-4 border-b border-border">
+                <nav className="flex flex-col gap-1">
+                  <DrawerLink
+                    href="/users"
+                    label="Manage Users"
+                    active={pathname === "/users"}
+                    icon={
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                        <circle cx="12" cy="7" r="4" />
+                      </svg>
+                    }
+                    onNavigate={() => setMoreOpen(false)}
+                  />
+                </nav>
+              </div>
+            )}
+
+            {/* Theme toggle */}
+            <div className="px-5 py-4">
+              <ThemeToggle />
             </div>
 
             {/* Sign out */}
             <div className="px-5 pb-6" style={{ paddingBottom: "calc(24px + env(safe-area-inset-bottom, 0px))" }}>
               <button
                 onClick={() => signOut({ callbackUrl: "/login" })}
-                className="w-full py-3 rounded-xl text-sm font-medium text-white/60 bg-white/5 active:bg-white/10 transition-colors"
+                className="w-full py-3 rounded-xl text-sm font-medium text-muted bg-default active:bg-default-hover transition-colors"
               >
                 Sign out
               </button>
@@ -158,6 +173,57 @@ function AdminNav({ userName, userEmail }: { userName: string; userEmail: string
     </>
   );
 }
+
+/* ─── Theme toggle ─── */
+
+function ThemeToggle() {
+  const [isDark, setIsDark] = useState(true);
+
+  useEffect(() => {
+    setIsDark(document.documentElement.classList.contains("dark"));
+  }, []);
+
+  const toggle = useCallback(() => {
+    const next = !isDark;
+    setIsDark(next);
+    document.documentElement.classList.toggle("dark", next);
+    document.documentElement.classList.toggle("light", !next);
+    document.documentElement.setAttribute("data-theme", next ? "dark" : "light");
+  }, [isDark]);
+
+  return (
+    <button
+      onClick={toggle}
+      className="flex items-center justify-between w-full py-3 px-3 rounded-xl text-sm font-medium text-overlay-foreground active:bg-default transition-colors"
+    >
+      <div className="flex items-center gap-3">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          {isDark ? (
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+          ) : (
+            <>
+              <circle cx="12" cy="12" r="5" />
+              <line x1="12" y1="1" x2="12" y2="3" />
+              <line x1="12" y1="21" x2="12" y2="23" />
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+              <line x1="1" y1="12" x2="3" y2="12" />
+              <line x1="21" y1="12" x2="23" y2="12" />
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+            </>
+          )}
+        </svg>
+        <span>{isDark ? "Dark mode" : "Light mode"}</span>
+      </div>
+      <div className={`w-10 h-6 rounded-full relative transition-colors ${isDark ? "bg-accent" : "bg-default"}`}>
+        <div className={`absolute top-1 w-4 h-4 rounded-full transition-transform ${isDark ? "left-5 bg-accent-foreground" : "left-1 bg-overlay-foreground"}`} />
+      </div>
+    </button>
+  );
+}
+
+/* ─── Drawer link ─── */
 
 function DrawerLink({
   href,
@@ -178,81 +244,12 @@ function DrawerLink({
       onClick={onNavigate}
       className={`flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium transition-colors ${
         active
-          ? "bg-[#cc367e]/15 text-[#cc367e]"
-          : "text-white/70 active:bg-white/5"
+          ? "bg-accent-soft text-accent"
+          : "text-overlay-foreground active:bg-default"
       }`}
     >
       {icon}
       {label}
     </Link>
-  );
-}
-
-/* ─── Tech: expandable FAB in bottom-right ─── */
-
-function TechNav() {
-  const router = useRouter();
-  const [open, setOpen] = useState(false);
-
-  return (
-    <div
-      className="fixed z-50 flex flex-col items-end gap-3"
-      style={{
-        bottom: "calc(20px + env(safe-area-inset-bottom, 0px))",
-        right: "20px",
-      }}
-    >
-      {/* Expanded actions */}
-      {open && (
-        <>
-          {/* Backdrop to close */}
-          <div className="fixed inset-0 z-[-1]" onClick={() => setOpen(false)} />
-
-          {/* History button */}
-          <button
-            onClick={() => { setOpen(false); router.push("/history"); }}
-            className="flex items-center gap-2 pl-4 pr-3 py-2.5 rounded-full bg-[#262626] shadow-lg animate-in fade-in slide-in-from-bottom-2 duration-150"
-          >
-            <span className="text-sm font-medium text-white/80">History</span>
-            <svg
-              width="20" height="20" viewBox="0 0 32 32" fill="none"
-              stroke="#a3a3a3" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-            >
-              <path d="M6 16a10 10 0 1 1 3 7.07" />
-              <polyline points="16 10 16 16 20 18" />
-              <polyline points="6 12 6 17 11 17" />
-            </svg>
-          </button>
-
-          {/* New Work Order button */}
-          <button
-            onClick={() => { setOpen(false); router.push("/workorder/new"); }}
-            className="flex items-center gap-2 pl-4 pr-3 py-2.5 rounded-full bg-[#262626] shadow-lg animate-in fade-in slide-in-from-bottom-2 duration-150"
-          >
-            <span className="text-sm font-medium text-white/80">New Order</span>
-            <div className="w-8 h-8 rounded-full bg-[#cc367e] flex items-center justify-center">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
-                <line x1="12" y1="5" x2="12" y2="19" />
-                <line x1="5" y1="12" x2="19" y2="12" />
-              </svg>
-            </div>
-          </button>
-        </>
-      )}
-
-      {/* Main FAB toggle */}
-      <button
-        onClick={() => setOpen((o) => !o)}
-        aria-label={open ? "Close menu" : "Open menu"}
-        className={`flex items-center justify-center w-14 h-14 rounded-full shadow-lg active:scale-95 transition-all duration-200 ${
-          open ? "bg-[#262626] rotate-45" : "bg-[#cc367e]"
-        }`}
-      >
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
-          <line x1="12" y1="5" x2="12" y2="19" />
-          <line x1="5" y1="12" x2="19" y2="12" />
-        </svg>
-      </button>
-    </div>
   );
 }

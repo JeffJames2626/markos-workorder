@@ -109,7 +109,7 @@ export function ClientsPage({ clients: initial }: { clients: Client[] }) {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-white">Clients</h1>
+        <h1 className="text-xl font-semibold text-foreground">Clients</h1>
         <Button
           variant="primary"
           size="sm"
@@ -124,12 +124,12 @@ export function ClientsPage({ clients: initial }: { clients: Client[] }) {
         <Input placeholder="Search clients..." />
       </TextField>
 
-      <p className="text-xs text-white/50">
+      <p className="text-xs text-muted">
         {filtered.length} client{filtered.length !== 1 ? "s" : ""}
       </p>
 
       {filtered.length === 0 ? (
-        <div className="py-12 text-center text-white/40 text-sm">No clients found.</div>
+        <div className="py-12 text-center text-muted text-sm">No clients found.</div>
       ) : (
         <div className="flex flex-col gap-3">
           {filtered.map((client) => (
