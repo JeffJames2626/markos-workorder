@@ -1,11 +1,23 @@
-import webpush from "web-push";
 import { prisma } from "@/lib/db";
 
-const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!;
-const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY!;
-const VAPID_SUBJECT = process.env.VAPID_SUBJECT || "mailto:admin@markossprinklers.com";
+let webpushReady: typeof import("web-push") | null = null;
 
-webpush.setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
+async function getWebPush() {
+  if (webpushReady) return webpushReady;
+
+  const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+  const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY;
+  const VAPID_SUBJECT = process.env.VAPID_SUBJECT || "mailto:admin@markossprinklers.com";
+
+  if (!VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) {
+    throw new Error("VAPID keys not configured");
+  }
+
+  const webpush = (await import("web-push")).default;
+  webpush.setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
+  webpushReady = webpush;
+  return webpush;
+}
 
 export async function saveSubscription(userId: string, subscription: PushSubscriptionJSON) {
   const { endpoint, keys } = subscription as { endpoint: string; keys: { p256dh: string; auth: string } };
@@ -22,6 +34,8 @@ export async function removeSubscription(endpoint: string) {
 }
 
 export async function notifyAdmins(title: string, body: string, url?: string) {
+  const webpush = await getWebPush();
+
   const adminSubs = await prisma.pushSubscription.findMany({
     where: { user: { role: "admin" } },
   });
@@ -43,7 +57,6 @@ export async function notifyAdmins(title: string, body: string, url?: string) {
           payload
         );
       } catch (err: unknown) {
-        // Remove stale subscriptions (410 Gone or 404)
         if (err && typeof err === "object" && "statusCode" in err) {
           const statusCode = (err as { statusCode: number }).statusCode;
           if (statusCode === 410 || statusCode === 404) {

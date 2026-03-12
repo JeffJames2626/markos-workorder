@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState, useCallback } from "react";
 
 const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
 
@@ -13,43 +13,81 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
   return arr;
 }
 
-export function PushSubscriber({ role }: { role: string }) {
+export function usePushNotifications(role: string) {
+  const [supported, setSupported] = useState(false);
+  const [subscribed, setSubscribed] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  // Check current subscription state on mount
   useEffect(() => {
-    if (role !== "admin") return;
-    if (!VAPID_PUBLIC_KEY) return;
-    if (!("serviceWorker" in navigator) || !("PushManager" in window)) return;
+    if (role !== "admin") { setLoading(false); return; }
+    if (!VAPID_PUBLIC_KEY) { setLoading(false); return; }
+    if (typeof window === "undefined") { setLoading(false); return; }
+    if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
+      setLoading(false);
+      return;
+    }
 
-    const subscribe = async () => {
-      try {
-        const registration = await navigator.serviceWorker.ready;
+    setSupported(true);
 
-        // Check if already subscribed
-        let subscription = await registration.pushManager.getSubscription();
-
-        if (!subscription) {
-          // Request permission
-          const permission = await Notification.requestPermission();
-          if (permission !== "granted") return;
-
-          subscription = await registration.pushManager.subscribe({
-            userVisibleOnly: true,
-            applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY).buffer as ArrayBuffer,
-          });
-        }
-
-        // Send subscription to server
-        await fetch("/api/push", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ subscription: subscription.toJSON() }),
-        });
-      } catch (err) {
-        console.warn("Push subscription failed:", err);
-      }
-    };
-
-    subscribe();
+    navigator.serviceWorker.ready.then(async (reg) => {
+      const sub = await reg.pushManager.getSubscription();
+      setSubscribed(!!sub);
+      setLoading(false);
+    }).catch(() => setLoading(false));
   }, [role]);
 
-  return null;
+  const subscribe = useCallback(async () => {
+    if (!VAPID_PUBLIC_KEY || !supported) return false;
+    setLoading(true);
+    try {
+      const permission = await Notification.requestPermission();
+      if (permission !== "granted") { setLoading(false); return false; }
+
+      const registration = await navigator.serviceWorker.ready;
+      const subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY).buffer as ArrayBuffer,
+      });
+
+      await fetch("/api/push", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ subscription: subscription.toJSON() }),
+      });
+
+      setSubscribed(true);
+      setLoading(false);
+      return true;
+    } catch (err) {
+      console.warn("Push subscription failed:", err);
+      setLoading(false);
+      return false;
+    }
+  }, [supported]);
+
+  const unsubscribe = useCallback(async () => {
+    setLoading(true);
+    try {
+      const registration = await navigator.serviceWorker.ready;
+      const subscription = await registration.pushManager.getSubscription();
+      if (subscription) {
+        await fetch("/api/push", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ endpoint: subscription.endpoint }),
+        });
+        await subscription.unsubscribe();
+      }
+      setSubscribed(false);
+      setLoading(false);
+      return true;
+    } catch (err) {
+      console.warn("Push unsubscribe failed:", err);
+      setLoading(false);
+      return false;
+    }
+  }, []);
+
+  return { supported, subscribed, loading, subscribe, unsubscribe };
 }

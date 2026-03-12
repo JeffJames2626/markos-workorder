@@ -6,7 +6,6 @@ import { serializePrisma } from "@/lib/utils";
 import { TimerCard } from "@/components/home/TimerCard";
 import { RecentActivity } from "@/components/home/RecentActivity";
 import { BottomNav } from "@/components/layout/BottomNav";
-import { PushSubscriber } from "@/components/pwa/PushSubscriber";
 import { Avatar } from "@heroui/react";
 
 export default async function WorkOrderHome() {
@@ -64,7 +63,6 @@ export default async function WorkOrderHome() {
         userName={session.user.name}
         userEmail={session.user.email}
       />
-      <PushSubscriber role={session.user.role} />
     </div>
   );
 }
