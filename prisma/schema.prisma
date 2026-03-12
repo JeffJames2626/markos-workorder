@@ -1,0 +1,108 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  name          String
+  passwordHash  String?   @map("password_hash")
+  role          String    @default("tech")
+  inviteToken   String?   @unique @map("invite_token")
+  inviteExpires DateTime? @map("invite_expires")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  workOrders  WorkOrder[]
+  customParts CustomPart[]
+
+  @@map("users")
+}
+
+model WorkOrder {
+  id          String   @id @default(uuid())
+  userId      String?  @map("user_id")
+  submittedAt DateTime @default(now()) @map("submitted_at")
+
+  clientId    String? @map("client_id")
+  clientName  String  @map("client_name")
+  address     String
+  phone       String?
+  serviceType String? @map("service_type")
+  date        String
+  zones       Int?
+  completed   String  @default("Y")
+  techName    String  @map("tech_name")
+
+  clockInTime  BigInt? @map("clock_in_time")
+  clockOutTime BigInt? @map("clock_out_time")
+  billableSecs Int     @default(0) @map("billable_secs")
+  pausedSecs   Int     @default(0) @map("paused_secs")
+
+  description String?
+  repairs     String?
+
+  techSig       String?  @map("tech_sig")
+  techSigDate   String?  @map("tech_sig_date")
+  clientSig     String?  @map("client_sig")
+  clientSigDate String?  @map("client_sig_date")
+  clientAbsent  Boolean  @default(false) @map("client_absent")
+
+  emailSent Boolean @default(false) @map("email_sent")
+
+  user   User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
+  client Client?         @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  parts  WorkOrderPart[]
+
+  @@index([userId])
+  @@index([clientId])
+  @@index([submittedAt(sort: Desc)])
+  @@map("work_orders")
+}
+
+model WorkOrderPart {
+  id          String @id @default(uuid())
+  workOrderId String @map("work_order_id")
+  category    String
+  itemName    String @map("item_name")
+  quantity    Int    @default(1)
+  isCustom    Boolean @default(false) @map("is_custom")
+
+  workOrder WorkOrder @relation(fields: [workOrderId], references: [id], onDelete: Cascade)
+
+  @@index([workOrderId])
+  @@map("work_order_parts")
+}
+
+model Client {
+  id        String   @id @default(uuid())
+  name      String
+  address   String?
+  email     String?
+  phone     String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  workOrders WorkOrder[]
+
+  @@map("clients")
+}
+
+model CustomPart {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  category  String
+  itemName  String   @map("item_name")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, category, itemName])
+  @@index([userId])
+  @@map("custom_parts")
+}

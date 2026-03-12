@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd \"C:\\\\Users\\\\Morgan Caldbeck\\\\Documents\\\\dev\\\\markos-workorder\" && mkdir -p _old && mv index.html vite.config.js _old/ && mv src _old/src 2>/dev/null || true && echo \"done\")",
+      "Bash(cd \"C:\\\\Users\\\\Morgan Caldbeck\\\\Documents\\\\dev\\\\markos-workorder\" && npm install 2>&1)",
+      "Bash(cd \"C:\\\\Users\\\\Morgan Caldbeck\\\\Documents\\\\dev\\\\markos-workorder\" && ls node_modules | head -10 && echo \"---\" && node_modules/.bin/next --version 2>/dev/null || echo \"next not found\")",
+      "Bash(cd \"C:\\\\Users\\\\Morgan Caldbeck\\\\Documents\\\\dev\\\\markos-workorder\" && npm run build 2>&1 | head -60)",
+      "Bash(cd \"C:\\\\Users\\\\Morgan Caldbeck\\\\Documents\\\\dev\\\\markos-workorder\" && npm run build 2>&1)",
+      "Bash(cd \"C:\\\\Users\\\\Morgan Caldbeck\\\\Documents\\\\dev\\\\markos-workorder\" && rm drizzle.config.ts && rm -f lib/db/schema.ts)",
+      "Bash(node -e \"console.log\\(require\\('crypto'\\).randomBytes\\(32\\).toString\\('hex'\\)\\)\")",
+      "Bash(cd \"C:\\\\Users\\\\Morgan Caldbeck\\\\Documents\\\\dev\\\\markos-workorder\" && rm -rf components hooks types app/globals.css app/layout.tsx app/page.tsx app/login app/workorder app/history && echo \"done\")",
+      "Bash(cd \"C:\\\\Users\\\\Morgan Caldbeck\\\\Documents\\\\dev\\\\markos-workorder\" && npm run build 2>&1 | tail -20)",
+      "WebFetch(domain:v3.heroui.com)",
+      "mcp__figma-desktop__get_design_context",
+      "mcp__figma-desktop__get_screenshot"
+    ]
+  }
+}
