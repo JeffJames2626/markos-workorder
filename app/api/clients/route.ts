@@ -13,15 +13,15 @@ export async function GET() {
 
 const CreateClientSchema = z.object({
   name: z.string().min(1),
-  address: z.string().optional(),
-  email: z.string().optional(),
-  phone: z.string().optional(),
+  address: z.string().min(1),
+  email: z.string().min(1),
+  phone: z.string().min(1),
 });
 
 export async function POST(request: Request) {
   const session = await auth();
-  if (!session || session.user.role !== "admin") {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const body = await request.json();
