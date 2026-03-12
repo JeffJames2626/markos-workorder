@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
+import { usePushNotifications } from "@/components/pwa/PushSubscriber";
 
 interface BottomNavProps {
   role: string;
@@ -17,12 +18,13 @@ export function BottomNav({ role, userName, userEmail }: BottomNavProps) {
   const [moreOpen, setMoreOpen] = useState(false);
 
   const isAdmin = role === "admin";
+  const push = usePushNotifications(role);
 
   return (
     <>
       <nav
         className="fixed bottom-0 left-0 right-0 z-50 bg-overlay border-t border-border"
-        style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
+        style={{ paddingBottom: "calc(12px + env(safe-area-inset-bottom, 0px))" }}
       >
         <div className="flex items-center justify-between px-6 py-3 max-w-[480px] mx-auto">
           {/* Home */}
@@ -153,9 +155,22 @@ export function BottomNav({ role, userName, userEmail }: BottomNavProps) {
               </div>
             )}
 
-            {/* Theme toggle */}
-            <div className="px-5 py-4">
+            {/* Toggles */}
+            <div className="px-5 py-4 flex flex-col gap-1">
               <ThemeToggle />
+              {isAdmin && push.supported && (
+                <PushToggle
+                  subscribed={push.subscribed}
+                  loading={push.loading}
+                  onToggle={async () => {
+                    if (push.subscribed) {
+                      await push.unsubscribe();
+                    } else {
+                      await push.subscribe();
+                    }
+                  }}
+                />
+              )}
             </div>
 
             {/* Sign out */}
@@ -218,6 +233,37 @@ function ThemeToggle() {
       </div>
       <div className={`w-10 h-6 rounded-full relative transition-colors ${isDark ? "bg-accent" : "bg-default"}`}>
         <div className={`absolute top-1 w-4 h-4 rounded-full transition-transform ${isDark ? "left-5 bg-accent-foreground" : "left-1 bg-overlay-foreground"}`} />
+      </div>
+    </button>
+  );
+}
+
+/* ─── Push toggle ─── */
+
+function PushToggle({
+  subscribed,
+  loading,
+  onToggle,
+}: {
+  subscribed: boolean;
+  loading: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <button
+      onClick={onToggle}
+      disabled={loading}
+      className="flex items-center justify-between w-full py-3 px-3 rounded-xl text-sm font-medium text-overlay-foreground active:bg-default transition-colors disabled:opacity-50"
+    >
+      <div className="flex items-center gap-3">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+          <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+        </svg>
+        <span>Notifications</span>
+      </div>
+      <div className={`w-10 h-6 rounded-full relative transition-colors ${subscribed ? "bg-accent" : "bg-default"}`}>
+        <div className={`absolute top-1 w-4 h-4 rounded-full transition-transform ${subscribed ? "left-5 bg-accent-foreground" : "left-1 bg-overlay-foreground"}`} />
       </div>
     </button>
   );

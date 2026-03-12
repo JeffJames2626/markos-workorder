@@ -33,13 +33,11 @@ export default async function WorkOrderHome() {
         {/* Header */}
         <section className="flex items-center justify-between pt-4 pb-6">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <div style={{ height: 40, width: 48, overflow: "hidden" }}>
-            <img
-              src="/logo.png"
-              alt="Marko's Sprinklers"
-              style={{ width: 48, marginTop: -2 }}
-            />
-          </div>
+          <img
+            src="/logo.png"
+            alt="Marko's Sprinklers"
+            style={{ height: 40, width: "auto" }}
+          />
           <Avatar color="accent" variant="soft">
             <Avatar.Fallback>{initials}</Avatar.Fallback>
           </Avatar>

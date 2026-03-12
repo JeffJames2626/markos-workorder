@@ -18,6 +18,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className="dark" data-theme="dark">
       <head>
+        <link rel="icon" href="/favicon.ico" sizes="32x32" />
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#cc367e" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
