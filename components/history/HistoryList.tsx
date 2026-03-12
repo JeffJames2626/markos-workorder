@@ -95,13 +95,13 @@ export function HistoryList({ orders, isAdmin }: HistoryListProps) {
       </div>
 
       {/* Results count */}
-      <p className="text-xs text-white/50">
+      <p className="text-xs text-muted">
         {filtered.length} order{filtered.length !== 1 ? "s" : ""}
       </p>
 
       {/* Order list */}
       {filtered.length === 0 ? (
-        <div className="py-12 text-center text-white/40 text-sm">
+        <div className="py-12 text-center text-muted text-sm">
           No work orders found.
         </div>
       ) : (

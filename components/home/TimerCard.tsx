@@ -20,9 +20,19 @@ type Client = {
   name: string;
 };
 
+const JOB_TYPES = [
+  { id: "repair", name: "Repair" },
+  { id: "install", name: "Install" },
+  { id: "winterize", name: "Winterize" },
+  { id: "startup", name: "Start Up" },
+  { id: "inspection", name: "Inspection" },
+  { id: "other", name: "Other" },
+];
+
 export function TimerCard({ clients }: { clients: Client[] }) {
   const router = useRouter();
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [jobType, setJobType] = useState<string | null>(null);
   const [running, setRunning] = useState(false);
   const [elapsed, setElapsed] = useState(0);
   const clockInRef = useRef<number | null>(null);
@@ -37,7 +47,6 @@ export function TimerCard({ clients }: { clients: Client[] }) {
 
   const handleToggle = () => {
     if (running) {
-      // Stop timer → navigate to wizard
       if (intervalRef.current) clearInterval(intervalRef.current);
       const clockIn = clockInRef.current;
       const clockOut = Date.now();
@@ -50,9 +59,9 @@ export function TimerCard({ clients }: { clients: Client[] }) {
       });
       if (selectedId) params.set("clientId", selectedId);
       if (selectedName) params.set("client", selectedName);
+      if (jobType) params.set("jobType", jobType);
       router.push(`/workorder/new?${params.toString()}`);
     } else {
-      // Start timer
       clockInRef.current = Date.now();
       setElapsed(0);
       setRunning(true);
@@ -67,41 +76,11 @@ export function TimerCard({ clients }: { clients: Client[] }) {
   }, []);
 
   return (
-    <div className="bg-[#171717] rounded-xl p-4 flex flex-col gap-4">
-      {/* Timer row */}
-      <div className="flex items-center justify-between">
-        <span
-          className={`text-[40px] font-bold tracking-tight leading-none tabular-nums ${
-            running ? "text-white" : "text-white/40"
-          }`}
-        >
-          {formatElapsed(elapsed)}
-        </span>
-
-        {/* Play / Stop button */}
-        <button
-          onClick={handleToggle}
-          aria-label={running ? "Stop timer" : "Start timer"}
-          className="flex items-center justify-center w-14 h-14 rounded-full bg-[#262626] active:scale-95 transition-transform"
-        >
-          {running ? (
-            /* Stop icon (square) */
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="white">
-              <rect x="3" y="3" width="14" height="14" rx="2" />
-            </svg>
-          ) : (
-            /* Play icon (triangle) */
-            <svg width="22" height="26" viewBox="0 0 22 26" fill="white">
-              <path d="M2 1.5L20.5 13L2 24.5V1.5Z" />
-            </svg>
-          )}
-        </button>
-      </div>
-
+    <div className="bg-surface rounded-xl p-4 flex flex-col gap-4">
       {/* Client dropdown */}
       <Select
         aria-label="Client"
-        placeholder="Select a client"
+        placeholder="Client"
         fullWidth
         selectedKey={selectedId}
         onSelectionChange={(key: Key | null) =>
@@ -124,6 +103,63 @@ export function TimerCard({ clients }: { clients: Client[] }) {
           </ListBox>
         </Select.Popover>
       </Select>
+
+      {/* Job type dropdown */}
+      <Select
+        aria-label="Job type"
+        placeholder="Job type"
+        fullWidth
+        selectedKey={jobType}
+        onSelectionChange={(key: Key | null) =>
+          setJobType(key as string | null)
+        }
+      >
+        <Label className="sr-only">Job type</Label>
+        <Select.Trigger>
+          <Select.Value />
+          <Select.Indicator />
+        </Select.Trigger>
+        <Select.Popover>
+          <ListBox>
+            {JOB_TYPES.map((j) => (
+              <ListBox.Item key={j.id} id={j.id} textValue={j.name}>
+                {j.name}
+                <ListBox.ItemIndicator />
+              </ListBox.Item>
+            ))}
+          </ListBox>
+        </Select.Popover>
+      </Select>
+
+      {/* Timer row */}
+      <div className="flex items-center justify-between">
+        <span
+          className={`text-[40px] font-bold tracking-tight leading-none tabular-nums ${
+            running ? "text-foreground" : "text-muted"
+          }`}
+        >
+          {formatElapsed(elapsed)}
+        </span>
+
+        {/* Play / Stop button */}
+        <button
+          onClick={handleToggle}
+          aria-label={running ? "Stop timer" : "Start timer"}
+          className={`flex items-center justify-center w-14 h-14 rounded-full active:scale-95 transition-all ${
+            running ? "bg-danger" : "bg-background"
+          }`}
+        >
+          {running ? (
+            <svg width="18" height="18" viewBox="0 0 20 20" className="fill-danger-foreground">
+              <rect x="3" y="3" width="14" height="14" rx="2" />
+            </svg>
+          ) : (
+            <svg width="18" height="20" viewBox="0 0 22 26" className="fill-foreground ml-1">
+              <path d="M2 1.5L20.5 13L2 24.5V1.5Z" />
+            </svg>
+          )}
+        </button>
+      </div>
     </div>
   );
 }

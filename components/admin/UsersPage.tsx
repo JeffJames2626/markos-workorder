@@ -112,7 +112,7 @@ export function UsersPage({ users: initial, currentUserId }: { users: User[]; cu
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-white">Users</h1>
+        <h1 className="text-xl font-semibold text-foreground">Users</h1>
         <Button
           variant="primary"
           size="sm"
@@ -122,12 +122,12 @@ export function UsersPage({ users: initial, currentUserId }: { users: User[]; cu
         </Button>
       </div>
 
-      <p className="text-xs text-white/50">
+      <p className="text-xs text-muted">
         {initial.length} user{initial.length !== 1 ? "s" : ""}
       </p>
 
       {initial.length === 0 ? (
-        <div className="py-12 text-center text-white/40 text-sm">No users found.</div>
+        <div className="py-12 text-center text-muted text-sm">No users found.</div>
       ) : (
         <div className="flex flex-col gap-3">
           {initial.map((user) => (
@@ -139,13 +139,13 @@ export function UsersPage({ users: initial, currentUserId }: { users: User[]; cu
                       <p className="text-sm font-medium text-foreground">{user.name}</p>
                       <span className={`text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded-full ${
                         user.role === "admin"
-                          ? "bg-[#cc367e]/15 text-[#cc367e]"
-                          : "bg-white/10 text-white/60"
+                          ? "bg-accent-soft text-accent"
+                          : "bg-default text-muted"
                       }`}>
                         {user.role}
                       </span>
                       {!user.passwordHash && user.inviteToken && (
-                        <span className="text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-amber-500/15 text-amber-400">
+                        <span className="text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-warning-soft text-warning">
                           Invited
                         </span>
                       )}
@@ -189,7 +189,7 @@ export function UsersPage({ users: initial, currentUserId }: { users: User[]; cu
                 role={role} setRole={setRole}
                 showPassword={false}
               />
-              <p className="text-xs text-white/40 mt-2">
+              <p className="text-xs text-muted mt-2">
                 An invite email will be sent for the user to set their password.
               </p>
             </Modal.Body>

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 72" fill="none">
+  <!-- Outer pill/cloud shape -->
+  <rect x="2" y="2" width="116" height="68" rx="34" fill="#cc367e" stroke="#cc367e" stroke-width="2"/>
+  <!-- MS text -->
+  <text x="60" y="52" font-family="Arial, Helvetica, sans-serif" font-size="46" font-weight="bold" fill="white" text-anchor="middle">MS</text>
+</svg>

@@ -101,7 +101,7 @@ export function StartButton({ client }: { client?: string }) {
 
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", userSelect: "none" }}>
           {/* Label */}
-          <span className={`text-sm${running ? "text-accent opacity-60" : "text-muted"}`}>
+          <span className={`text-sm ${running ? "text-accent opacity-60" : "text-muted"}`}>
             Total Time
           </span>
 
@@ -115,7 +115,7 @@ export function StartButton({ client }: { client?: string }) {
 
           {/* Tap hint / End pill */}
           {running ? (
-            <span className="mt-5 text-sm font-boldtext-accent-foreground bg-accent px-6 py-1.5 rounded-full">
+            <span className="mt-5 text-sm font-bold text-accent-foreground bg-accent px-6 py-1.5 rounded-full">
               End
             </span>
           ) : (

@@ -7,36 +7,14 @@ import Link from "next/link";
 export function NavHeader({ role }: { role: string }) {
   return (
     <header
-      className="sticky top-0 z-20 flex items-center justify-between px-5 h-14"
-      style={{
-        background: "var(--color-surface, #161616)",
-        borderBottom: "2px solid #ee4f9a",
-      }}
+      className="sticky top-0 z-20 flex items-center justify-between px-5 h-14 bg-surface border-b-2 border-accent"
     >
       {/* Brand */}
       <Link href="/workorder" className="flex items-baseline gap-1.5">
-        <span
-          className="uppercase"
-          style={{
-            fontSize: 17,
-            fontWeight: 800,
-            color: "var(--color-foreground, #fff)",
-            fontFamily: "var(--font-barlow, sans-serif)",
-            letterSpacing: "0.14em",
-          }}
-        >
+        <span className="uppercase text-[17px] font-extrabold text-foreground tracking-[0.14em]">
           Marko&apos;s
         </span>
-        <span
-          className="uppercase"
-          style={{
-            fontSize: 17,
-            fontWeight: 800,
-            color: "#ee4f9a",
-            fontFamily: "var(--font-barlow, sans-serif)",
-            letterSpacing: "0.14em",
-          }}
-        >
+        <span className="uppercase text-[17px] font-extrabold text-accent tracking-[0.14em]">
           Sprinklers
         </span>
       </Link>

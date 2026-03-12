@@ -24,7 +24,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <link rel="apple-touch-icon" href="/icon-192.png" />
       </head>
-      <body>
+      <body className="bg-background text-foreground">
         <Providers>{children}</Providers>
         <ServiceWorkerRegister />
       </body>
