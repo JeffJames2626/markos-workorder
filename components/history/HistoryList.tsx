@@ -33,6 +33,7 @@ export function HistoryList({ orders, isAdmin }: HistoryListProps) {
   const router = useRouter();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const filtered = orders.filter((o) => {
     if (statusFilter !== "all" && o.completed !== statusFilter) return false;
@@ -53,6 +54,14 @@ export function HistoryList({ orders, isAdmin }: HistoryListProps) {
 
   const statusColor = (s: string) =>
     s === "Y" ? "text-success" : s === "N" ? "text-warning" : "text-accent";
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Delete this work order? This cannot be undone.")) return;
+    setDeletingId(id);
+    await fetch(`/api/work-orders/${id}`, { method: "DELETE" });
+    setDeletingId(null);
+    router.refresh();
+  };
 
   return (
     <div className="flex flex-col gap-4">
@@ -146,6 +155,21 @@ export function HistoryList({ orders, isAdmin }: HistoryListProps) {
                         {hrs ? `${hrs} hrs` : fmtSecs(order.billableSecs)}
                       </span>
                     </div>
+
+                    {isAdmin && (
+                      <div className="flex justify-end pt-1">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(order.id);
+                          }}
+                          disabled={deletingId === order.id}
+                          className="text-xs font-medium text-danger px-2 py-1 rounded-lg active:bg-danger-soft transition-colors disabled:opacity-50"
+                        >
+                          {deletingId === order.id ? "Deleting..." : "Delete"}
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </Card.Content>
               </Card>
