@@ -1,0 +1,9 @@
+@import "tailwindcss";
+@import "@heroui/styles";
+
+/* Dark theme field overrides — HeroUI v3 sets field-border: transparent by default */
+.dark,
+[data-theme="dark"] {
+  --field-border: oklch(35% 0.006 286.033);
+  --field-border-width: 1px;
+}
