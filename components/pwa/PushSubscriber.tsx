@@ -20,7 +20,6 @@ export function usePushNotifications(role: string) {
 
   // Check current subscription state on mount
   useEffect(() => {
-    if (role !== "admin") { setLoading(false); return; }
     if (!VAPID_PUBLIC_KEY) { setLoading(false); return; }
     if (typeof window === "undefined") { setLoading(false); return; }
     if (!("serviceWorker" in navigator) || !("PushManager" in window)) {

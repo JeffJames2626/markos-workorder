@@ -85,17 +85,8 @@ export async function markEmailSent(id: string) {
 
 export async function updateWorkOrder(
   id: string,
-  data: {
-    completed?: string;
-    userId?: string;
-    techName?: string;
-    clockInTime?: bigint | null;
-    clockOutTime?: bigint | null;
-    billableSecs?: number;
-    clientSig?: string | null;
-    clientSigDate?: string | null;
-    clientAbsent?: boolean;
-  }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  data: Record<string, any>
 ) {
   return prisma.workOrder.update({
     where: { id },

@@ -114,8 +114,8 @@ export function QuickCreateSheet({ clients: initialClients, techName, isOpen, on
 
   return (
     <>
-      {/* Backdrop + sheet */}
-      <div className="fixed inset-0 z-[60]" onClick={handleClose}>
+      {/* Backdrop + sheet — hidden while add-client modal is open */}
+      <div className={`fixed inset-0 z-[60] ${addModal.isOpen ? "invisible" : ""}`} onClick={handleClose}>
         <div className="absolute inset-0 bg-black/60" />
         <div
           className="absolute bottom-0 left-0 right-0 bg-overlay rounded-t-2xl flex flex-col animate-in slide-in-from-bottom duration-200"

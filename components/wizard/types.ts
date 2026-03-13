@@ -59,5 +59,5 @@ export const SERVICE_TYPES = [
 export const COMPLETED_OPTIONS = [
   { value: "Y", label: "Done" },
   { value: "N", label: "Return Visit" },
-  { value: "P", label: "Partial" },
+  { value: "P", label: "Pending" },
 ] as const;

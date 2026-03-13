@@ -8,6 +8,8 @@ import { WorkOrderTimer } from "./WorkOrderTimer";
 import { StatusChanger } from "./StatusChanger";
 import { PartsEditor } from "./PartsEditor";
 import { ClientAcknowledgement } from "./ClientAcknowledgement";
+import { JobSummaryEditor } from "./JobSummaryEditor";
+import { NotesEditor } from "./NotesEditor";
 
 interface Part {
   id: string;
@@ -46,9 +48,6 @@ export function OrderDetail({ order, isAdmin }: { order: Order; isAdmin: boolean
   const [deleting, setDeleting] = useState(false);
   const hrs = fmtHrs(order.billableSecs);
 
-  const statusLabel =
-    order.completed === "Y" ? "Done" : order.completed === "N" ? "Return Visit" : "Partial";
-
   const handleDelete = async () => {
     if (!confirm("Delete this work order? This cannot be undone.")) return;
     setDeleting(true);
@@ -83,21 +82,15 @@ export function OrderDetail({ order, isAdmin }: { order: Order; isAdmin: boolean
         <StatusChanger orderId={order.id} currentStatus={order.completed} />
 
         {/* Job Summary */}
-        <Card variant="default">
-          <Card.Header>
-            <Card.Title>Job Summary</Card.Title>
-          </Card.Header>
-          <Card.Content>
-            <div className="flex flex-col gap-2 text-sm">
-              <Row label="Client" value={order.clientName} />
-              <Row label="Address" value={order.address} />
-              {order.phone && <Row label="Phone" value={order.phone} />}
-              {order.serviceType && <Row label="Service" value={order.serviceType} />}
-              <Row label="Date" value={order.date} />
-              <Row label="Technician" value={order.techName} />
-            </div>
-          </Card.Content>
-        </Card>
+        <JobSummaryEditor
+          orderId={order.id}
+          clientName={order.clientName}
+          address={order.address}
+          phone={order.phone}
+          serviceType={order.serviceType}
+          date={order.date}
+          techName={order.techName}
+        />
 
         {/* Time */}
         <Card variant="default">
@@ -118,30 +111,12 @@ export function OrderDetail({ order, isAdmin }: { order: Order; isAdmin: boolean
         <PartsEditor orderId={order.id} parts={order.parts} />
 
         {/* Notes */}
-        {(order.description || order.repairs || order.zones) && (
-          <Card variant="default">
-            <Card.Header>
-              <Card.Title>Notes</Card.Title>
-            </Card.Header>
-            <Card.Content>
-              <div className="flex flex-col gap-2 text-sm">
-                {order.zones && <Row label="Zones" value={String(order.zones)} />}
-                {order.description && (
-                  <div>
-                    <span className="text-muted block mb-1">Description</span>
-                    <p className="text-foreground">{order.description}</p>
-                  </div>
-                )}
-                {order.repairs && (
-                  <div>
-                    <span className="text-muted block mb-1">Repairs needed</span>
-                    <p className="text-foreground">{order.repairs}</p>
-                  </div>
-                )}
-              </div>
-            </Card.Content>
-          </Card>
-        )}
+        <NotesEditor
+          orderId={order.id}
+          zones={order.zones}
+          description={order.description}
+          repairs={order.repairs}
+        />
 
         {/* Client Acknowledgement */}
         <ClientAcknowledgement

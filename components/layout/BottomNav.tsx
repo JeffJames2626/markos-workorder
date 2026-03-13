@@ -172,7 +172,7 @@ export function BottomNav({ role, userName, userEmail, clients = [], techName = 
             {/* Toggles */}
             <div className="px-5 py-4 flex flex-col gap-1">
               <ThemeToggle />
-              {isAdmin && push.supported && (
+              {push.supported && (
                 <PushToggle
                   subscribed={push.subscribed}
                   loading={push.loading}

@@ -42,6 +42,14 @@ const PatchSchema = z.object({
   completed: z.enum(["Y", "N", "P"]).optional(),
   userId: z.string().optional(),
   techName: z.string().optional(),
+  clientName: z.string().min(1).optional(),
+  address: z.string().optional(),
+  phone: z.string().nullable().optional(),
+  serviceType: z.string().nullable().optional(),
+  date: z.string().optional(),
+  zones: z.number().nullable().optional(),
+  description: z.string().nullable().optional(),
+  repairs: z.string().nullable().optional(),
   clockInTime: z.number().nullable().optional(),
   clockOutTime: z.number().nullable().optional(),
   billableSecs: z.number().int().min(0).optional(),
@@ -79,10 +87,19 @@ export async function PATCH(
     return NextResponse.json({ error: "Only admins can reassign" }, { status: 403 });
   }
 
-  const updateData: Parameters<typeof updateWorkOrder>[1] = {};
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const updateData: Record<string, any> = {};
   if (parsed.data.completed !== undefined) updateData.completed = parsed.data.completed;
   if (parsed.data.userId !== undefined) updateData.userId = parsed.data.userId;
   if (parsed.data.techName !== undefined) updateData.techName = parsed.data.techName;
+  if (parsed.data.clientName !== undefined) updateData.clientName = parsed.data.clientName;
+  if (parsed.data.address !== undefined) updateData.address = parsed.data.address;
+  if (parsed.data.phone !== undefined) updateData.phone = parsed.data.phone;
+  if (parsed.data.serviceType !== undefined) updateData.serviceType = parsed.data.serviceType;
+  if (parsed.data.date !== undefined) updateData.date = parsed.data.date;
+  if (parsed.data.zones !== undefined) updateData.zones = parsed.data.zones;
+  if (parsed.data.description !== undefined) updateData.description = parsed.data.description;
+  if (parsed.data.repairs !== undefined) updateData.repairs = parsed.data.repairs;
   if (parsed.data.clockInTime !== undefined) {
     updateData.clockInTime = parsed.data.clockInTime ? BigInt(parsed.data.clockInTime) : null;
   }

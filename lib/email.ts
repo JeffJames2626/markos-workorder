@@ -47,7 +47,7 @@ function buildEmailText(data: EmailWorkOrderData): string {
       ? "Yes"
       : data.completed === "N"
       ? "Return Visit"
-      : "Partial";
+      : "Pending";
 
   return `MARKO'S SPRINKLERS — SERVICE WORK ORDER
 ==========================================

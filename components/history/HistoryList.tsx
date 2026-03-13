@@ -26,7 +26,7 @@ const STATUS_FILTERS = [
   { value: "all", label: "All" },
   { value: "Y", label: "Done" },
   { value: "N", label: "Return Visit" },
-  { value: "P", label: "Partial" },
+  { value: "P", label: "Pending" },
 ] as const;
 
 export function HistoryList({ orders, isAdmin }: HistoryListProps) {
@@ -50,7 +50,7 @@ export function HistoryList({ orders, isAdmin }: HistoryListProps) {
   });
 
   const statusLabel = (s: string) =>
-    s === "Y" ? "Done" : s === "N" ? "Return Visit" : "Partial";
+    s === "Y" ? "Done" : s === "N" ? "Return Visit" : "Pending";
 
   const statusColor = (s: string) =>
     s === "Y" ? "text-success" : s === "N" ? "text-warning" : "text-accent";

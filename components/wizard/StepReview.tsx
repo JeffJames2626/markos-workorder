@@ -45,7 +45,7 @@ export function StepReview({ data, partsArray, onChange, onSubmit }: StepReviewP
             <Row label="Technician" value={data.techName} />
             <Row
               label="Status"
-              value={data.job.completed === "Y" ? "Done" : data.job.completed === "N" ? "Return Visit" : "Partial"}
+              value={data.job.completed === "Y" ? "Done" : data.job.completed === "N" ? "Return Visit" : "Pending"}
             />
           </div>
         </Card.Content>
