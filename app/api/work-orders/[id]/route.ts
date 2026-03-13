@@ -7,6 +7,7 @@ import {
   syncWorkOrderParts,
 } from "@/lib/db/queries/work-orders";
 import { serializePrisma } from "@/lib/utils";
+import { notifyAdmins, notifyUser } from "@/lib/push";
 import { z } from "zod";
 
 export async function GET(
@@ -44,6 +45,9 @@ const PatchSchema = z.object({
   clockInTime: z.number().nullable().optional(),
   clockOutTime: z.number().nullable().optional(),
   billableSecs: z.number().int().min(0).optional(),
+  clientSig: z.string().nullable().optional(),
+  clientSigDate: z.string().nullable().optional(),
+  clientAbsent: z.boolean().optional(),
   parts: z.array(PartSchema).optional(),
 });
 
@@ -86,6 +90,9 @@ export async function PATCH(
     updateData.clockOutTime = parsed.data.clockOutTime ? BigInt(parsed.data.clockOutTime) : null;
   }
   if (parsed.data.billableSecs !== undefined) updateData.billableSecs = parsed.data.billableSecs;
+  if (parsed.data.clientSig !== undefined) updateData.clientSig = parsed.data.clientSig;
+  if (parsed.data.clientSigDate !== undefined) updateData.clientSigDate = parsed.data.clientSigDate;
+  if (parsed.data.clientAbsent !== undefined) updateData.clientAbsent = parsed.data.clientAbsent;
 
   // Sync parts if provided
   if (parsed.data.parts !== undefined) {
@@ -93,6 +100,55 @@ export async function PATCH(
   }
 
   const updated = await updateWorkOrder(id, updateData);
+
+  // --- Push notifications (fire-and-forget) ---
+  const orderUrl = `/history/${id}`;
+
+  // Notify tech when a work order is reassigned to them
+  if (parsed.data.userId && parsed.data.userId !== order.userId) {
+    notifyUser(
+      parsed.data.userId,
+      "Work Order Assigned",
+      `A work order for ${order.clientName} has been assigned to you`,
+      orderUrl
+    ).catch(() => {});
+  }
+
+  // Notify admins when a work order is updated (status change, time logged, parts, acknowledgement)
+  const statusChanged = parsed.data.completed !== undefined && parsed.data.completed !== order.completed;
+  const timeLogged = parsed.data.clockOutTime !== undefined;
+  const partsChanged = parsed.data.parts !== undefined;
+  const acknowledged = parsed.data.clientSig !== undefined || parsed.data.clientAbsent !== undefined;
+  const isReassign = !!parsed.data.userId;
+
+  if (!isAdmin && (statusChanged || timeLogged || partsChanged || acknowledged)) {
+    const statusLabel = statusChanged
+      ? { Y: "Done", N: "Return Visit", P: "Pending" }[parsed.data.completed!] ?? parsed.data.completed
+      : null;
+    const description = statusChanged
+      ? `Status changed to ${statusLabel} for ${order.clientName}`
+      : timeLogged
+        ? `Time logged for ${order.clientName}`
+        : partsChanged
+          ? `Parts updated for ${order.clientName}`
+          : `Client acknowledgement updated for ${order.clientName}`;
+
+    notifyAdmins(
+      "Work Order Updated",
+      `${session.user.name}: ${description}`,
+      orderUrl
+    ).catch(() => {});
+  }
+
+  // Also notify admins when admin reassigns (so other admins are aware)
+  if (isAdmin && isReassign) {
+    notifyAdmins(
+      "Work Order Reassigned",
+      `${order.clientName} reassigned to ${parsed.data.techName}`,
+      orderUrl
+    ).catch(() => {});
+  }
+
   return NextResponse.json(serializePrisma(updated));
 }
 

@@ -7,6 +7,7 @@ import { fmtSecs, fmtHrs, fmtTime } from "@/lib/utils";
 import { WorkOrderTimer } from "./WorkOrderTimer";
 import { StatusChanger } from "./StatusChanger";
 import { PartsEditor } from "./PartsEditor";
+import { ClientAcknowledgement } from "./ClientAcknowledgement";
 
 interface Part {
   id: string;
@@ -142,38 +143,14 @@ export function OrderDetail({ order, isAdmin }: { order: Order; isAdmin: boolean
           </Card>
         )}
 
-        {/* Signatures */}
-        <Card variant="default">
-          <Card.Header>
-            <Card.Title>Signatures</Card.Title>
-          </Card.Header>
-          <Card.Content>
-            <div className="flex flex-col gap-3 text-sm">
-              {order.techSig && (
-                <div>
-                  <span className="text-muted block mb-1">Technician</span>
-                  <p className="text-lg font-medium italic text-foreground">{order.techSig}</p>
-                  {order.techSigDate && (
-                    <span className="text-xs text-muted">{order.techSigDate}</span>
-                  )}
-                </div>
-              )}
-              {order.clientAbsent ? (
-                <div className="py-2 px-3 rounded-xl bg-warning/10">
-                  <p className="text-sm text-warning">Client was not present for sign-off.</p>
-                </div>
-              ) : order.clientSig ? (
-                <div>
-                  <span className="text-muted block mb-1">Client</span>
-                  <p className="text-lg font-medium italic text-foreground">{order.clientSig}</p>
-                  {order.clientSigDate && (
-                    <span className="text-xs text-muted">{order.clientSigDate}</span>
-                  )}
-                </div>
-              ) : null}
-            </div>
-          </Card.Content>
-        </Card>
+        {/* Client Acknowledgement */}
+        <ClientAcknowledgement
+          orderId={order.id}
+          clientName={order.clientName}
+          clientSig={order.clientSig}
+          clientSigDate={order.clientSigDate}
+          clientAbsent={order.clientAbsent}
+        />
 
         {/* Delete */}
         {isAdmin && (

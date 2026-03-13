@@ -1,5 +1,7 @@
 import { prisma } from "@/lib/db";
 
+type PushSub = { id: string; endpoint: string; p256dh: string; auth: string };
+
 let webpushReady: typeof import("web-push") | null = null;
 
 async function getWebPush() {
@@ -31,6 +33,44 @@ export async function saveSubscription(userId: string, subscription: PushSubscri
 
 export async function removeSubscription(endpoint: string) {
   await prisma.pushSubscription.deleteMany({ where: { endpoint } });
+}
+
+export async function notifyUser(userId: string, title: string, body: string, url?: string) {
+  const webpush = await getWebPush();
+
+  const subs = await prisma.pushSubscription.findMany({
+    where: { userId },
+  });
+
+  const payload = JSON.stringify({
+    title,
+    body,
+    url: url || "/workorder",
+  });
+
+  const results = await Promise.allSettled(
+    subs.map(async (sub: PushSub) => {
+      try {
+        await webpush.sendNotification(
+          {
+            endpoint: sub.endpoint,
+            keys: { p256dh: sub.p256dh, auth: sub.auth },
+          },
+          payload
+        );
+      } catch (err: unknown) {
+        if (err && typeof err === "object" && "statusCode" in err) {
+          const statusCode = (err as { statusCode: number }).statusCode;
+          if (statusCode === 410 || statusCode === 404) {
+            await prisma.pushSubscription.delete({ where: { id: sub.id } });
+          }
+        }
+        throw err;
+      }
+    })
+  );
+
+  return results;
 }
 
 export async function notifyAdmins(title: string, body: string, url?: string) {

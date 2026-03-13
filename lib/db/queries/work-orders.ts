@@ -92,6 +92,9 @@ export async function updateWorkOrder(
     clockInTime?: bigint | null;
     clockOutTime?: bigint | null;
     billableSecs?: number;
+    clientSig?: string | null;
+    clientSigDate?: string | null;
+    clientAbsent?: boolean;
   }
 ) {
   return prisma.workOrder.update({
