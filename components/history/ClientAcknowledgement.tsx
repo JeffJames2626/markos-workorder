@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Card, Checkbox } from "@heroui/react";
+import { Card } from "@heroui/react";
 
 interface ClientAcknowledgementProps {
   orderId: string;
@@ -24,10 +24,9 @@ export function ClientAcknowledgement({
   const [absent, setAbsent] = useState(initialAbsent);
   const [saving, setSaving] = useState(false);
 
-  const alreadySigned = !!clientSig;
-
-  const handleAcknowledge = async (checked: boolean) => {
-    setAcknowledged(checked);
+  const handleAcknowledge = async () => {
+    const next = !acknowledged;
+    setAcknowledged(next);
     setSaving(true);
     try {
       const now = new Date().toLocaleDateString("en-US", {
@@ -39,35 +38,37 @@ export function ClientAcknowledgement({
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          clientSig: checked ? clientName : null,
-          clientSigDate: checked ? now : null,
+          clientSig: next ? clientName : null,
+          clientSigDate: next ? now : null,
           clientAbsent: false,
         }),
       });
+      if (next) setAbsent(false);
       router.refresh();
     } catch {
-      setAcknowledged(!checked);
+      setAcknowledged(!next);
     }
     setSaving(false);
   };
 
-  const handleAbsent = async (checked: boolean) => {
-    setAbsent(checked);
+  const handleAbsent = async () => {
+    const next = !absent;
+    setAbsent(next);
     setSaving(true);
     try {
       await fetch(`/api/work-orders/${orderId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          clientAbsent: checked,
+          clientAbsent: next,
           clientSig: null,
           clientSigDate: null,
         }),
       });
-      if (checked) setAcknowledged(false);
+      if (next) setAcknowledged(false);
       router.refresh();
     } catch {
-      setAbsent(!checked);
+      setAbsent(!next);
     }
     setSaving(false);
   };
@@ -79,7 +80,7 @@ export function ClientAcknowledgement({
       </Card.Header>
       <Card.Content>
         <div className="flex flex-col gap-4">
-          {/* Acknowledgement text + checkbox */}
+          {/* Acknowledgement */}
           <div className="rounded-xl bg-surface p-4">
             <p className="text-sm text-foreground leading-relaxed mb-4">
               I, <span className="font-medium">{clientName}</span>, acknowledge
@@ -88,17 +89,20 @@ export function ClientAcknowledgement({
               follow-up work identified will be addressed in a separate work
               order.
             </p>
-            <Checkbox
-              isSelected={acknowledged}
-              isDisabled={saving || absent}
-              onChange={(checked) => handleAcknowledge(!!checked)}
-            >
-              <span className="text-sm font-medium">
+            <label className={`flex items-center gap-3 ${saving || absent ? "opacity-50 pointer-events-none" : "cursor-pointer"}`}>
+              <input
+                type="checkbox"
+                checked={acknowledged}
+                onChange={handleAcknowledge}
+                disabled={saving || absent}
+                className="w-5 h-5 rounded border-2 border-border accent-accent shrink-0"
+              />
+              <span className="text-sm font-medium text-foreground">
                 I acknowledge the services performed
               </span>
-            </Checkbox>
+            </label>
             {acknowledged && clientSigDate && (
-              <p className="text-xs text-muted mt-2 ml-7">
+              <p className="text-xs text-muted mt-2 ml-8">
                 Acknowledged on {clientSigDate}
               </p>
             )}
@@ -106,15 +110,20 @@ export function ClientAcknowledgement({
 
           {/* Client not present */}
           <div className="rounded-xl bg-surface p-4">
-            <Checkbox
-              isSelected={absent}
-              isDisabled={saving || acknowledged}
-              onChange={(checked) => handleAbsent(!!checked)}
-            >
-              <span className="text-sm font-medium">Client was not present</span>
-            </Checkbox>
+            <label className={`flex items-center gap-3 ${saving || acknowledged ? "opacity-50 pointer-events-none" : "cursor-pointer"}`}>
+              <input
+                type="checkbox"
+                checked={absent}
+                onChange={handleAbsent}
+                disabled={saving || acknowledged}
+                className="w-5 h-5 rounded border-2 border-border accent-accent shrink-0"
+              />
+              <span className="text-sm font-medium text-foreground">
+                Client was not present
+              </span>
+            </label>
             {absent && (
-              <p className="text-xs text-warning mt-2 ml-7">
+              <p className="text-xs text-warning mt-2 ml-8">
                 Work order completed without client sign-off.
               </p>
             )}
