@@ -82,3 +82,58 @@ export async function markEmailSent(id: string) {
     data: { emailSent: true },
   });
 }
+
+export async function updateWorkOrder(
+  id: string,
+  data: {
+    completed?: string;
+    userId?: string;
+    techName?: string;
+    clockInTime?: bigint | null;
+    clockOutTime?: bigint | null;
+    billableSecs?: number;
+  }
+) {
+  return prisma.workOrder.update({
+    where: { id },
+    data,
+    include: { parts: true },
+  });
+}
+
+export async function getPendingWorkOrders() {
+  return prisma.workOrder.findMany({
+    where: { completed: "P" },
+    include: { parts: true },
+    orderBy: { submittedAt: "desc" },
+  });
+}
+
+export async function getPendingWorkOrdersByUser(userId: string) {
+  return prisma.workOrder.findMany({
+    where: { userId, completed: "P" },
+    include: { parts: true },
+    orderBy: { submittedAt: "desc" },
+  });
+}
+
+export async function syncWorkOrderParts(
+  workOrderId: string,
+  parts: Array<{ category: string; itemName: string; quantity: number; isCustom: boolean }>
+) {
+  // Delete all existing parts and recreate
+  await prisma.workOrderPart.deleteMany({ where: { workOrderId } });
+  if (parts.length > 0) {
+    await prisma.workOrderPart.createMany({
+      data: parts.map((p) => ({ workOrderId, ...p })),
+    });
+  }
+  return prisma.workOrderPart.findMany({ where: { workOrderId } });
+}
+
+export async function getAllTechs() {
+  return prisma.user.findMany({
+    select: { id: true, name: true },
+    orderBy: { name: "asc" },
+  });
+}

@@ -20,6 +20,8 @@ export default async function Clients() {
         role={session.user.role}
         userName={session.user.name}
         userEmail={session.user.email}
+        clients={clients}
+        techName={session.user.name}
       />
     </div>
   );

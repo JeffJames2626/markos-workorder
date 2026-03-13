@@ -5,17 +5,23 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { usePushNotifications } from "@/components/pwa/PushSubscriber";
+import { QuickCreateSheet } from "@/components/home/QuickCreateSheet";
+
+type Client = { id: string; name: string; address?: string | null; phone?: string | null };
 
 interface BottomNavProps {
   role: string;
   userName: string;
   userEmail: string;
+  clients?: Client[];
+  techName?: string;
 }
 
-export function BottomNav({ role, userName, userEmail }: BottomNavProps) {
+export function BottomNav({ role, userName, userEmail, clients = [], techName = "" }: BottomNavProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [moreOpen, setMoreOpen] = useState(false);
+  const [createOpen, setCreateOpen] = useState(false);
 
   const isAdmin = role === "admin";
   const push = usePushNotifications(role);
@@ -53,7 +59,7 @@ export function BottomNav({ role, userName, userEmail }: BottomNavProps) {
 
           {/* Add (New Work Order) */}
           <button
-            onClick={() => router.push("/workorder/new")}
+            onClick={() => setCreateOpen(true)}
             aria-label="New work order"
             className="flex items-center justify-center w-[82px] h-12 rounded-full bg-accent text-accent-foreground active:scale-95 transition-transform"
           >
@@ -97,6 +103,14 @@ export function BottomNav({ role, userName, userEmail }: BottomNavProps) {
           </button>
         </div>
       </nav>
+
+      {/* Quick create sheet */}
+      <QuickCreateSheet
+        clients={clients}
+        techName={techName}
+        isOpen={createOpen}
+        onClose={() => setCreateOpen(false)}
+      />
 
       {/* More drawer */}
       {moreOpen && (

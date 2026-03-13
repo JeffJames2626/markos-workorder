@@ -1,10 +1,13 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { getWorkOrdersByUser, getAllWorkOrders } from "@/lib/db/queries/work-orders";
+import {
+  getPendingWorkOrders,
+  getPendingWorkOrdersByUser,
+  getAllTechs,
+} from "@/lib/db/queries/work-orders";
 import { getAllClients } from "@/lib/db/queries/clients";
 import { serializePrisma } from "@/lib/utils";
-import { TimerCard } from "@/components/home/TimerCard";
-import { RecentActivity } from "@/components/home/RecentActivity";
+import { PendingOrders } from "@/components/home/PendingOrders";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { Avatar } from "@heroui/react";
 
@@ -12,12 +15,12 @@ export default async function WorkOrderHome() {
   const session = await auth();
   if (!session) redirect("/login");
 
-  const raw =
-    session.user.role === "admin"
-      ? await getAllWorkOrders()
-      : await getWorkOrdersByUser(session.user.id);
+  const isAdmin = session.user.role === "admin";
+  const raw = isAdmin
+    ? await getPendingWorkOrders()
+    : await getPendingWorkOrdersByUser(session.user.id);
 
-  const orders = serializePrisma(raw.slice(0, 5));
+  const orders = serializePrisma(raw);
   const initials = session.user.name
     ?.split(" ")
     .map((n: string) => n[0])
@@ -25,6 +28,7 @@ export default async function WorkOrderHome() {
     .slice(0, 2)
     .toUpperCase() ?? "?";
   const clients = await getAllClients();
+  const techs = isAdmin ? await getAllTechs() : [];
 
   return (
     <div className="min-h-dvh flex flex-col bg-background">
@@ -43,17 +47,13 @@ export default async function WorkOrderHome() {
           </Avatar>
         </section>
 
-        {/* Timer card with client & job type selects */}
+        {/* Pending work orders */}
         <section className="pt-2">
-          <TimerCard clients={clients} />
-        </section>
-
-        {/* Activity feed */}
-        <section className="pt-6">
           <h2 className="text-xs font-medium tracking-tight text-foreground mb-4">
-            Recent activity
+            Pending Work Orders
           </h2>
-          <RecentActivity orders={orders} />
+          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+          <PendingOrders orders={orders as any} isAdmin={isAdmin} techs={techs} />
         </section>
 
       </main>
@@ -62,6 +62,8 @@ export default async function WorkOrderHome() {
         role={session.user.role}
         userName={session.user.name}
         userEmail={session.user.email}
+        clients={clients}
+        techName={session.user.name}
       />
     </div>
   );

@@ -4,6 +4,9 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Card, Button, Separator } from "@heroui/react";
 import { fmtSecs, fmtHrs, fmtTime } from "@/lib/utils";
+import { WorkOrderTimer } from "./WorkOrderTimer";
+import { StatusChanger } from "./StatusChanger";
+import { PartsEditor } from "./PartsEditor";
 
 interface Part {
   id: string;
@@ -67,6 +70,17 @@ export function OrderDetail({ order, isAdmin }: { order: Order; isAdmin: boolean
           Back
         </button>
 
+        {/* Timer */}
+        <WorkOrderTimer
+          orderId={order.id}
+          existingClockIn={order.clockInTime}
+          existingClockOut={order.clockOutTime}
+          existingBillableSecs={order.billableSecs}
+        />
+
+        {/* Status */}
+        <StatusChanger orderId={order.id} currentStatus={order.completed} />
+
         {/* Job Summary */}
         <Card variant="default">
           <Card.Header>
@@ -80,7 +94,6 @@ export function OrderDetail({ order, isAdmin }: { order: Order; isAdmin: boolean
               {order.serviceType && <Row label="Service" value={order.serviceType} />}
               <Row label="Date" value={order.date} />
               <Row label="Technician" value={order.techName} />
-              <Row label="Status" value={statusLabel} />
             </div>
           </Card.Content>
         </Card>
@@ -101,26 +114,7 @@ export function OrderDetail({ order, isAdmin }: { order: Order; isAdmin: boolean
         </Card>
 
         {/* Parts */}
-        {order.parts.length > 0 && (
-          <Card variant="default">
-            <Card.Header>
-              <Card.Title>Parts ({order.parts.length})</Card.Title>
-            </Card.Header>
-            <Card.Content>
-              <div className="flex flex-col gap-1.5">
-                {order.parts.map((p) => (
-                  <div key={p.id} className="flex justify-between text-sm">
-                    <span className="text-foreground">
-                      {p.itemName}
-                      {p.isCustom && <span className="text-muted ml-1">(custom)</span>}
-                    </span>
-                    <span className="text-muted">x{p.quantity}</span>
-                  </div>
-                ))}
-              </div>
-            </Card.Content>
-          </Card>
-        )}
+        <PartsEditor orderId={order.id} parts={order.parts} />
 
         {/* Notes */}
         {(order.description || order.repairs || order.zones) && (

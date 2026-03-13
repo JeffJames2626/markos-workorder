@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { getWorkOrdersByUser, getAllWorkOrders } from "@/lib/db/queries/work-orders";
+import { getAllClients } from "@/lib/db/queries/clients";
 import { serializePrisma } from "@/lib/utils";
 import { HistoryList } from "@/components/history/HistoryList";
 import { BottomNav } from "@/components/layout/BottomNav";
@@ -12,6 +13,7 @@ export default async function HistoryPage() {
   const isAdmin = session.user.role === "admin";
   const raw = isAdmin ? await getAllWorkOrders() : await getWorkOrdersByUser(session.user.id);
   const orders = serializePrisma(raw);
+  const clients = await getAllClients();
 
   return (
     <div className="min-h-dvh flex flex-col bg-background">
@@ -26,6 +28,8 @@ export default async function HistoryPage() {
         role={session.user.role}
         userName={session.user.name}
         userEmail={session.user.email}
+        clients={clients}
+        techName={session.user.name}
       />
     </div>
   );
