@@ -10,6 +10,7 @@ import { PartsEditor } from "./PartsEditor";
 import { ClientAcknowledgement } from "./ClientAcknowledgement";
 import { JobSummaryEditor } from "./JobSummaryEditor";
 import { NotesEditor } from "./NotesEditor";
+import { PhotosEditor } from "./PhotosEditor";
 
 interface Part {
   id: string;
@@ -17,6 +18,12 @@ interface Part {
   itemName: string;
   quantity: number;
   isCustom: boolean;
+}
+
+interface Photo {
+  id: string;
+  url: string;
+  pathname: string;
 }
 
 interface Order {
@@ -41,6 +48,7 @@ interface Order {
   clientSigDate: string | null;
   clientAbsent: boolean;
   parts: Part[];
+  photos: Photo[];
 }
 
 export function OrderDetail({ order, isAdmin }: { order: Order; isAdmin: boolean }) {
@@ -117,6 +125,9 @@ export function OrderDetail({ order, isAdmin }: { order: Order; isAdmin: boolean
           description={order.description}
           repairs={order.repairs}
         />
+
+        {/* Photos */}
+        <PhotosEditor orderId={order.id} initialPhotos={order.photos} />
 
         {/* Client Acknowledgement */}
         <ClientAcknowledgement

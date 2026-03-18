@@ -78,6 +78,7 @@ export function WizardShell({ techName, clients }: WizardShellProps) {
       zones: null,
       description: "",
       repairs: "",
+      photos: [],
     },
     signoff: {
       techSig: "",
@@ -141,6 +142,20 @@ export function WizardShell({ techName, clients }: WizardShellProps) {
 
     if (res.ok) {
       const order = await res.json();
+
+      // Associate uploaded photos with the work order
+      if (data.notes.photos.length > 0) {
+        try {
+          await fetch(`/api/work-orders/${order.id}/photos`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ photos: data.notes.photos }),
+          });
+        } catch {
+          // Photo association failure is non-fatal
+        }
+      }
+
       // Attempt email (non-fatal)
       try {
         await fetch("/api/email", {

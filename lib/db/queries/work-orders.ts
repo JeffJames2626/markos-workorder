@@ -42,21 +42,21 @@ export async function createWorkOrder(input: CreateWorkOrderInput) {
         create: parts,
       },
     },
-    include: { parts: true },
+    include: { parts: true, photos: true },
   });
 }
 
 export async function getWorkOrdersByUser(userId: string) {
   return prisma.workOrder.findMany({
     where: { userId },
-    include: { parts: true },
+    include: { parts: true, photos: true },
     orderBy: { submittedAt: "desc" },
   });
 }
 
 export async function getAllWorkOrders() {
   return prisma.workOrder.findMany({
-    include: { parts: true },
+    include: { parts: true, photos: true },
     orderBy: { submittedAt: "desc" },
   });
 }
@@ -64,7 +64,7 @@ export async function getAllWorkOrders() {
 export async function getWorkOrderById(id: string) {
   return prisma.workOrder.findUnique({
     where: { id },
-    include: { parts: true },
+    include: { parts: true, photos: true },
   });
 }
 
@@ -91,14 +91,14 @@ export async function updateWorkOrder(
   return prisma.workOrder.update({
     where: { id },
     data,
-    include: { parts: true },
+    include: { parts: true, photos: true },
   });
 }
 
 export async function getPendingWorkOrders() {
   return prisma.workOrder.findMany({
     where: { completed: "P" },
-    include: { parts: true },
+    include: { parts: true, photos: true },
     orderBy: { submittedAt: "desc" },
   });
 }
@@ -106,7 +106,7 @@ export async function getPendingWorkOrders() {
 export async function getPendingWorkOrdersByUser(userId: string) {
   return prisma.workOrder.findMany({
     where: { userId, completed: "P" },
-    include: { parts: true },
+    include: { parts: true, photos: true },
     orderBy: { submittedAt: "desc" },
   });
 }

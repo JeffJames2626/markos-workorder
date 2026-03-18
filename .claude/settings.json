@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(vercel --version)",
+      "Bash(npm install:*)",
+      "Bash(pnpm --version)",
+      "Bash(npx --version)",
+      "Bash(npx vercel:*)",
+      "Bash(grep -r \"BLOB_READ_WRITE_TOKEN\\\\|vercel\" /Users/morgancaldbeck/Documents/Dev/markos-workorder --include=*.ts --include=*.tsx -n)",
+      "Bash(npx prisma:*)",
+      "Bash(npx dotenv:*)",
+      "Bash(set -a)",
+      "Bash(source /Users/morgancaldbeck/Documents/Dev/markos-workorder/.env.local)",
+      "Bash(set +a)",
+      "Bash(ls /Users/morgancaldbeck/Documents/Dev/markos-workorder/app/api/work-orders/[id]/)",
+      "Bash(npx tsc:*)"
+    ],
+    "additionalDirectories": [
+      "/Users/morgancaldbeck/Documents/Dev/markos-workorder/app/api/work-orders/[id]"
+    ]
+  }
+}

@@ -1,6 +1,7 @@
 "use client";
 
 import { Card, TextField, NumberField, TextArea, Label } from "@heroui/react";
+import { PhotoUploader, type PhotoItem } from "@/components/PhotoUploader";
 import type { NotesData } from "./types";
 
 interface StepNotesProps {
@@ -59,6 +60,21 @@ export function StepNotes({ data, onChange }: StepNotesProps) {
               />
             </TextField>
           </div>
+        </Card.Content>
+      </Card>
+
+      <Card variant="default">
+        <Card.Header>
+          <Card.Title>Photos</Card.Title>
+        </Card.Header>
+        <Card.Content>
+          <PhotoUploader
+            photos={data.photos as PhotoItem[]}
+            uploadUrl="/api/photos/upload"
+            onPhotosChange={(photos) =>
+              set("photos", photos.map((p) => ({ url: p.url, pathname: p.pathname })))
+            }
+          />
         </Card.Content>
       </Card>
     </div>

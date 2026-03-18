@@ -117,6 +117,27 @@ export function StepReview({ data, partsArray, onChange, onSubmit }: StepReviewP
         </Card>
       )}
 
+      {/* Photos */}
+      {data.notes.photos.length > 0 && (
+        <Card variant="default">
+          <Card.Header>
+            <Card.Title>Photos ({data.notes.photos.length})</Card.Title>
+          </Card.Header>
+          <Card.Content>
+            <div className="grid grid-cols-3 gap-2">
+              {data.notes.photos.map((photo, i) => (
+                <img
+                  key={photo.url}
+                  src={photo.url}
+                  alt={`Photo ${i + 1}`}
+                  className="w-full aspect-square object-cover rounded-lg"
+                />
+              ))}
+            </div>
+          </Card.Content>
+        </Card>
+      )}
+
       <Separator />
 
       {/* Signatures */}

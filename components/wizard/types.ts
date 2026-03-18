@@ -17,10 +17,16 @@ export interface TimerData {
 
 export type PartSelection = Record<string, number>; // "Category||ItemName" → qty
 
+export interface PhotoData {
+  url: string;
+  pathname: string;
+}
+
 export interface NotesData {
   zones: number | null;
   description: string;
   repairs: string;
+  photos: PhotoData[];
 }
 
 export interface SignoffData {
