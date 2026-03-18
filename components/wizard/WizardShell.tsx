@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@heroui/react";
 import type { WizardData, Client } from "./types";
+import { BASE_CATALOG } from "@/lib/parts-catalog";
 import { StepJobInfo } from "./StepJobInfo";
 import { StepTime } from "./StepTime";
 import { StepParts } from "./StepParts";
@@ -106,7 +107,8 @@ export function WizardShell({ techName, clients }: WizardShellProps) {
     .filter(([, qty]) => qty > 0)
     .map(([key, qty]) => {
       const [category, itemName] = key.split("||");
-      return { category, itemName, quantity: qty, isCustom: false };
+      const catalogItems = BASE_CATALOG[category]?.items ?? [];
+      return { category, itemName, quantity: qty, isCustom: !catalogItems.includes(itemName) };
     });
 
   const handleSubmit = async () => {

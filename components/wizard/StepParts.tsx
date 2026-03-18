@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Accordion, Checkbox, Card, Button, Input } from "@heroui/react";
 import { BASE_CATALOG } from "@/lib/parts-catalog";
 import type { PartSelection } from "./types";
@@ -10,9 +10,28 @@ interface StepPartsProps {
   onChange: (data: PartSelection) => void;
 }
 
+interface CustomPart {
+  id: string;
+  category: string;
+  itemName: string;
+}
+
 export function StepParts({ data, onChange }: StepPartsProps) {
   const [newPartCategory, setNewPartCategory] = useState<string | null>(null);
   const [newPartName, setNewPartName] = useState("");
+  const [customParts, setCustomParts] = useState<CustomPart[]>([]);
+
+  useEffect(() => {
+    fetch("/api/custom-parts")
+      .then((r) => r.json())
+      .then(setCustomParts)
+      .catch(() => {});
+  }, []);
+
+  const customByCategory = customParts.reduce<Record<string, CustomPart[]>>((acc, p) => {
+    (acc[p.category] ??= []).push(p);
+    return acc;
+  }, {});
 
   const togglePart = (key: string) => {
     const next = { ...data };
@@ -38,6 +57,17 @@ export function StepParts({ data, onChange }: StepPartsProps) {
     if (!newPartCategory || !newPartName.trim()) return;
     const key = `${newPartCategory}||${newPartName.trim()}`;
     onChange({ ...data, [key]: 1 });
+
+    // Persist the custom part
+    fetch("/api/custom-parts", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ category: newPartCategory, itemName: newPartName.trim() }),
+    })
+      .then((r) => r.json())
+      .then((part) => setCustomParts((prev) => [...prev, part]))
+      .catch(() => {});
+
     setNewPartName("");
     setNewPartCategory(null);
   };
@@ -54,6 +84,10 @@ export function StepParts({ data, onChange }: StepPartsProps) {
 
       <Accordion>
         {Object.entries(BASE_CATALOG).map(([category, { icon, items }]) => {
+          const custom = customByCategory[category] ?? [];
+          const customNames = custom.map((c) => c.itemName);
+          const allItems = [...items, ...customNames.filter((name) => !items.includes(name))];
+
           const categoryParts = Object.entries(data).filter(
             ([key, qty]) => key.startsWith(category + "||") && qty > 0
           );
@@ -76,10 +110,11 @@ export function StepParts({ data, onChange }: StepPartsProps) {
               </Accordion.Heading>
               <Accordion.Panel>
                 <div className="flex flex-col gap-1">
-                  {items.map((item) => {
+                  {allItems.map((item) => {
                     const key = `${category}||${item}`;
                     const qty = data[key] ?? 0;
                     const selected = qty > 0;
+                    const isCustom = !items.includes(item);
 
                     return (
                       <div
@@ -90,7 +125,14 @@ export function StepParts({ data, onChange }: StepPartsProps) {
                           isSelected={selected}
                           onChange={() => togglePart(key)}
                         >
-                          <span className="text-sm">{item}</span>
+                          <span className="text-sm">
+                            {item}
+                            {isCustom && (
+                              <span className="ml-1.5 text-[10px] text-accent bg-accent-soft px-1.5 py-0.5 rounded-full">
+                                Custom
+                              </span>
+                            )}
+                          </span>
                         </Checkbox>
 
                         {selected && (

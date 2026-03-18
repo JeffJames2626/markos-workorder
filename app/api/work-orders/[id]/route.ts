@@ -8,6 +8,7 @@ import {
 } from "@/lib/db/queries/work-orders";
 import { serializePrisma } from "@/lib/utils";
 import { notifyAdmins, notifyUser } from "@/lib/push";
+import { sendReturnVisitEmail } from "@/lib/email";
 import { z } from "zod";
 
 export async function GET(
@@ -164,6 +165,27 @@ export async function PATCH(
       `${order.clientName} reassigned to ${parsed.data.techName}`,
       orderUrl
     ).catch(() => {});
+  }
+
+  // Send return visit email when status changes to "N"
+  if (statusChanged && parsed.data.completed === "N") {
+    sendReturnVisitEmail({
+      clientName: order.clientName,
+      address: order.address,
+      phone: order.phone,
+      techName: order.techName,
+      date: order.date,
+      zones: order.zones,
+      completed: "N",
+      serviceType: order.serviceType,
+      clockInTime: order.clockInTime ? Number(order.clockInTime) : null,
+      clockOutTime: order.clockOutTime ? Number(order.clockOutTime) : null,
+      billableSecs: order.billableSecs,
+      pausedSecs: order.pausedSecs,
+      description: order.description,
+      repairs: order.repairs,
+      parts: order.parts,
+    }).catch(() => {});
   }
 
   return NextResponse.json(serializePrisma(updated));

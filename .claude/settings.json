@@ -13,10 +13,13 @@
       "Bash(source /Users/morgancaldbeck/Documents/Dev/markos-workorder/.env.local)",
       "Bash(set +a)",
       "Bash(ls /Users/morgancaldbeck/Documents/Dev/markos-workorder/app/api/work-orders/[id]/)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(git config:*)",
+      "Bash(find /Users/morgancaldbeck/Documents/Dev/markos-workorder -type f -name *[Mm]ore*)"
     ],
     "additionalDirectories": [
-      "/Users/morgancaldbeck/Documents/Dev/markos-workorder/app/api/work-orders/[id]"
+      "/Users/morgancaldbeck/Documents/Dev/markos-workorder/app/api/work-orders/[id]",
+      "/Users/morgancaldbeck/Documents/Dev/markos-workorder/app/api/custom-parts"
     ]
   }
 }

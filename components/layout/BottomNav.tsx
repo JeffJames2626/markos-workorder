@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { usePushNotifications } from "@/components/pwa/PushSubscriber";
 import { QuickCreateSheet } from "@/components/home/QuickCreateSheet";
+import { AddClientSheet } from "@/components/home/AddClientSheet";
 
 type Client = { id: string; name: string; address?: string | null; phone?: string | null };
 
@@ -22,9 +23,24 @@ export function BottomNav({ role, userName, userEmail, clients = [], techName = 
   const router = useRouter();
   const [moreOpen, setMoreOpen] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
+  const [addClientOpen, setAddClientOpen] = useState(false);
+  const [plusMenuOpen, setPlusMenuOpen] = useState(false);
+  const plusMenuRef = useRef<HTMLDivElement>(null);
 
   const isAdmin = role === "admin";
   const push = usePushNotifications(role);
+
+  // Close plus menu on outside click
+  useEffect(() => {
+    if (!plusMenuOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (plusMenuRef.current && !plusMenuRef.current.contains(e.target as Node)) {
+        setPlusMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [plusMenuOpen]);
 
   return (
     <>
@@ -57,17 +73,54 @@ export function BottomNav({ role, userName, userEmail, clients = [], techName = 
             </svg>
           </Link>
 
-          {/* Add (New Work Order) */}
-          <button
-            onClick={() => setCreateOpen(true)}
-            aria-label="New work order"
-            className="flex items-center justify-center w-[82px] h-12 rounded-full bg-accent text-accent-foreground active:scale-95 transition-transform"
-          >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-              <line x1="12" y1="5" x2="12" y2="19" />
-              <line x1="5" y1="12" x2="19" y2="12" />
-            </svg>
-          </button>
+          {/* Plus button with popup menu */}
+          <div className="relative" ref={plusMenuRef}>
+            {plusMenuOpen && (
+              <div className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 bg-overlay rounded-xl border border-border shadow-lg overflow-hidden min-w-[180px] animate-in fade-in zoom-in-95 duration-150">
+                <button
+                  onClick={() => {
+                    setPlusMenuOpen(false);
+                    setCreateOpen(true);
+                  }}
+                  className="flex items-center gap-3 w-full px-4 py-3 text-sm text-overlay-foreground active:bg-default transition-colors"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                    <line x1="12" y1="18" x2="12" y2="12" />
+                    <line x1="9" y1="15" x2="15" y2="15" />
+                  </svg>
+                  New Work Order
+                </button>
+                <div className="h-px bg-border" />
+                <button
+                  onClick={() => {
+                    setPlusMenuOpen(false);
+                    setAddClientOpen(true);
+                  }}
+                  className="flex items-center gap-3 w-full px-4 py-3 text-sm text-overlay-foreground active:bg-default transition-colors"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                    <circle cx="8.5" cy="7" r="4" />
+                    <line x1="20" y1="8" x2="20" y2="14" />
+                    <line x1="23" y1="11" x2="17" y2="11" />
+                  </svg>
+                  Add Client
+                </button>
+              </div>
+            )}
+            <button
+              onClick={() => setPlusMenuOpen((v) => !v)}
+              aria-label="Create new"
+              className="flex items-center justify-center w-[82px] h-12 rounded-full bg-accent text-accent-foreground active:scale-95 transition-transform"
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+            </button>
+          </div>
 
           {/* Clients */}
           <Link href="/clients" aria-label="Clients" className={`p-2 ${pathname === "/clients" ? "text-accent" : "text-muted"}`}>
@@ -112,6 +165,12 @@ export function BottomNav({ role, userName, userEmail, clients = [], techName = 
         onClose={() => setCreateOpen(false)}
       />
 
+      {/* Add client sheet */}
+      <AddClientSheet
+        isOpen={addClientOpen}
+        onClose={() => setAddClientOpen(false)}
+      />
+
       {/* More drawer */}
       {moreOpen && (
         <div className="fixed inset-0 z-[60]" onClick={() => setMoreOpen(false)}>
@@ -149,10 +208,21 @@ export function BottomNav({ role, userName, userEmail, clients = [], techName = 
               </div>
             </div>
 
-            {/* Admin links */}
-            {isAdmin && (
-              <div className="px-5 py-4 border-b border-border">
-                <nav className="flex flex-col gap-1">
+            {/* Navigation links */}
+            <div className="px-5 py-4 border-b border-border">
+              <nav className="flex flex-col gap-1">
+                <DrawerLink
+                  href="/parts"
+                  label="Parts Catalog"
+                  active={pathname === "/parts"}
+                  icon={
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
+                    </svg>
+                  }
+                  onNavigate={() => setMoreOpen(false)}
+                />
+                {isAdmin && (
                   <DrawerLink
                     href="/users"
                     label="Manage Users"
@@ -165,9 +235,9 @@ export function BottomNav({ role, userName, userEmail, clients = [], techName = 
                     }
                     onNavigate={() => setMoreOpen(false)}
                   />
-                </nav>
-              </div>
-            )}
+                )}
+              </nav>
+            </div>
 
             {/* Toggles */}
             <div className="px-5 py-4 flex flex-col gap-1">

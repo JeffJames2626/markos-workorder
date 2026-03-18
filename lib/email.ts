@@ -97,6 +97,23 @@ export async function sendInviteEmail(data: {
   return result;
 }
 
+export async function sendReturnVisitEmail(data: EmailWorkOrderData) {
+  const from = process.env.RESEND_FROM_EMAIL ?? "workorders@markossprinklers.com";
+  const recipients = [
+    "info@markossprinklers.com",
+    "jeff@automatedlawnandpest.com",
+  ];
+
+  const result = await getResend().emails.send({
+    from,
+    to: recipients,
+    subject: `Return Visit Needed — ${data.clientName} — ${data.date}`,
+    text: buildEmailText(data),
+  });
+
+  return result;
+}
+
 export async function sendWorkOrderEmail(data: EmailWorkOrderData) {
   const recipient = process.env.RECIPIENT_EMAIL ?? "Jeff@automatedlawnandpest.com";
   const from = process.env.RESEND_FROM_EMAIL ?? "workorders@markossprinklers.com";
